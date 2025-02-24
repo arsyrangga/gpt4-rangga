@@ -5,29 +5,33 @@ app = Flask(__name__)
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    # Ambil data dari request
     data = request.json
     user_message = data.get('message', '')
+    conversation_history = data.get('history', [])  
 
-    # Inisialisasi client G4F
+    conversation_history.append({
+        "role": "user",
+        "content": user_message
+    })
+
     client = Client()
 
-    # Kirim pesan ke model
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "user",
-                "content": user_message
-            }
-        ]
+        messages=conversation_history
     )
 
-    # Ambil balasan dari model
-    bot_response = response.choices[0].message.content
+    bot_response = response.choices[0].message.content.replace("\n", " ")
 
-    # Kembalikan respon dalam format JSON
-    return jsonify({"response": bot_response})
+    conversation_history.append({
+        "role": "assistant",
+        "content": bot_response
+    })
+
+    return jsonify({
+        "response": bot_response,
+        "history": conversation_history  
+    })
 
 if __name__ == '__main__':
     app.run(debug=False)
