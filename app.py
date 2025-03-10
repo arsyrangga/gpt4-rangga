@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS  # Import CORS
 from g4f.client import Client
 import requests
 from io import BytesIO
 
 app = Flask(__name__)
+CORS(app, origins=["https://deepchan.tech", "localhost:3000"])  # Mengaktifkan CORS untuk seluruh rute
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -57,7 +59,6 @@ def image():
     image_bytes = BytesIO(image_response.content)
 
     return send_file(image_bytes, mimetype='image/jpeg')
-
 
 if __name__ == '__main__':
     app.run(debug=False)
